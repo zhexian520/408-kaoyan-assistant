@@ -9,7 +9,7 @@
 - 为什么错
 - 下一步练什么
 
-![项目海报](docs/poster-408-ai.png)
+![项目封面](cover.png)
 
 ## 项目介绍
 
@@ -79,7 +79,6 @@ flowchart LR
 ├── mcs-postgrad-helper-python/    # FastAPI AI 服务
 ├── kaoyan/                        # 408 Pilot 多智能体服务
 ├── database/                      # MySQL / PostgreSQL 建库与数据
-├── docs/                          # 作品介绍文档、海报、视频旁白
 ├── deploy/                        # Nginx 部署示例
 ├── scripts/start_all.sh           # 本地一键启动
 └── README.md
@@ -247,17 +246,9 @@ cd kaoyan
 pytest -q
 ```
 
-## 文档
-
-- [项目介绍文档（DOCX）](docs/408-project-introduction.docx)
-- [项目介绍文档（PDF）](docs/408-project-introduction.pdf)
-- [项目海报](docs/poster-408-ai.png)
-- [演示视频旁白](docs/video-narration.docx)
-
 ## 团队信息
 
 - 团队名称：408 计算机考研助手项目组
-- 成员与分工：待补充
 - 项目方向：计算机考研 408 全流程 AI 学习系统
 
 ## 说明
