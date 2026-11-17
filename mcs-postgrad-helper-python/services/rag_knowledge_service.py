@@ -426,7 +426,10 @@ class RagKnowledgeService:
     @classmethod
     def search_chunks(cls, query: str, collection: str = "knowledge_points",
                       subject_code: Optional[str] = None, top_k: int = 5,
-                      user_id: Optional[int] = None) -> List[Dict[str, Any]]:
+                      user_id: Optional[int] = None,
+                      document_id: Optional[int] = None,
+                      chunk_id: Optional[int] = None,
+                      page_number: Optional[int] = None) -> List[Dict[str, Any]]:
         """从 MySQL 检索知识切片或题库题目，返回 408 Pilot 可消费的统一结构。"""
         subject_code = {
             "数据结构": "DS",
@@ -500,8 +503,9 @@ class RagKnowledgeService:
                         }))
                 else:
                     sql = """
-                        SELECT c.id AS chunk_id, c.document_id AS doc_id, c.content,
-                               c.page_number, c.bbox_json, d.title AS doc_title, d.subject_code
+                        SELECT c.id AS chunk_id, c.document_id AS doc_id, c.chunk_index,
+                               c.content, c.page_number, c.bbox_json,
+                               d.title AS doc_title, d.subject_code
                         FROM kb_chunk c
                         JOIN kb_document d ON d.id = c.document_id
                         WHERE 1=1
@@ -519,6 +523,15 @@ class RagKnowledgeService:
                         else:
                             sql += " AND UPPER(d.subject_code) = %s"
                             params.append(code)
+                    if document_id is not None:
+                        sql += " AND c.document_id = %s"
+                        params.append(document_id)
+                    if chunk_id is not None:
+                        sql += " AND c.id = %s"
+                        params.append(chunk_id)
+                    if page_number is not None:
+                        sql += " AND c.page_number = %s"
+                        params.append(page_number)
                     cursor.execute(sql, params)
                     rows = cursor.fetchall()
                     documents = [str(row.get("content") or "") for row in rows]
@@ -532,6 +545,7 @@ class RagKnowledgeService:
                         ranked.append((score, {
                             "id": str(row.get("chunk_id")),
                             "chunk_id": row.get("chunk_id"),
+                            "chunk_index": row.get("chunk_index"),
                             "title": str(row.get("doc_title") or "408 知识库"),
                             "content": str(row.get("content") or ""),
                             "subject": subject_names.get(code, code),
@@ -549,12 +563,17 @@ class RagKnowledgeService:
             conn.close()
 
     @classmethod
-    async def search_and_ground(cls, query: str, subject_code: str = None, user_id: Optional[int] = None) -> Dict[str, Any]:
+    async def search_and_ground(cls, query: str, subject_code: str = None, user_id: Optional[int] = None,
+                                document_id: Optional[int] = None, chunk_id: Optional[int] = None,
+                                page_number: Optional[int] = None) -> Dict[str, Any]:
         """
         根据用户查询检索私有与公共知识库切片，并生成带真实大模型合成、资料溯源与幻觉抑制的高可靠回答
         """
         # 统一 MySQL 混合检索（BM25 + 中文字符 bigram）
-        ranked = cls.search_chunks(query, "knowledge_points", subject_code, top_k=5, user_id=user_id)
+        ranked = cls.search_chunks(
+            query, "knowledge_points", subject_code, top_k=5, user_id=user_id,
+            document_id=document_id, chunk_id=chunk_id, page_number=page_number,
+        )
         sources = []
         for r in ranked:
             bbox = None
@@ -569,6 +588,7 @@ class RagKnowledgeService:
                 "doc_title": r["title"],
                 "subject_code": r.get("subject"),
                 "page_number": r.get("page_number") or 1,
+                "chunk_index": r.get("chunk_index"),
                 "snippet": r["content"],
                 "bbox": bbox,
             })

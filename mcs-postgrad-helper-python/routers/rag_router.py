@@ -9,6 +9,9 @@ class RagSearchRequest(BaseModel):
     query: str
     subject_code: Optional[str] = None
     user_id: Optional[int] = None
+    document_id: Optional[int] = None
+    chunk_id: Optional[int] = None
+    page_number: Optional[int] = None
 
 class InternalRagRequest(BaseModel):
     query: str
@@ -126,7 +129,10 @@ async def search_knowledge_base(req: RagSearchRequest):
     result = await RagKnowledgeService.search_and_ground(
         query=req.query,
         subject_code=req.subject_code,
-        user_id=req.user_id
+        user_id=req.user_id,
+        document_id=req.document_id,
+        chunk_id=req.chunk_id,
+        page_number=req.page_number,
     )
     return {
         "code": 200,

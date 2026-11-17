@@ -414,7 +414,9 @@ export default function MultimodalQAPage() {
                   citations = parsed.citations.map((c: any) => ({
                     doc_title: c.title || c.source || "408 知识库",
                     title: c.title || c.source || "408 知识库",
-                    page: c.page_number || 1,
+                    page: c.page_number || c.page || 1,
+                    page_number: c.page_number || c.page || 1,
+                    source: c.source || c.doc_title || c.title || "",
                     doc_id: c.doc_id ?? null,
                     chunk_id: c.chunk_id ?? null,
                   }));
@@ -585,7 +587,7 @@ export default function MultimodalQAPage() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let fullContent = "";
-      let capturedCitations: Array<{ doc_title: string; page: number }> = [];
+      let capturedCitations: NonNullable<QAMessage["citations"]> = [];
       let capturedSteps: string[] = [];
       let buffer = "";
 
@@ -622,6 +624,7 @@ export default function MultimodalQAPage() {
                   "408 知识库",
                 page: citation.page_number || citation.page || 1,
                 page_number: citation.page_number || citation.page || 1,
+                source: citation.source || citation.doc_title || citation.title || "",
                 doc_id: citation.doc_id ?? null,
                 chunk_id: citation.chunk_id ?? null,
               }));
@@ -709,7 +712,12 @@ export default function MultimodalQAPage() {
         const updated = [...prev];
         const lastIdx = updated.length - 1;
         if (lastIdx >= 0 && updated[lastIdx].role === "assistant") {
-          updated[lastIdx].isStreaming = false;
+          updated[lastIdx] = {
+            ...updated[lastIdx],
+            citations: capturedCitations.length > 0 ? capturedCitations : updated[lastIdx].citations,
+            agentSteps: capturedSteps.length > 0 ? [...capturedSteps] : updated[lastIdx].agentSteps,
+            isStreaming: false,
+          };
         }
         return updated;
       });

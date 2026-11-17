@@ -119,6 +119,9 @@ export default function KnowledgeBasePage() {
   const [ragQuery, setRagQuery] = useState("");
   const [ragResult, setRagResult] = useState<any>(null);
   const [ragSearching, setRagSearching] = useState(false);
+  const [ragDocId, setRagDocId] = useState("");
+  const [ragPage, setRagPage] = useState("");
+  const [ragChunkId, setRagChunkId] = useState("");
   const [copiedChunkId, setCopiedChunkId] = useState<number | null>(null);
   const [highlightChunkId, setHighlightChunkId] = useState<number | null>(null);
 
@@ -271,10 +274,14 @@ export default function KnowledgeBasePage() {
     setRagResult(null);
 
     try {
+      const filterPayload: Record<string, number> = {};
+      if (ragDocId) filterPayload.document_id = Number(ragDocId);
+      if (ragPage.trim()) filterPayload.page_number = Number(ragPage);
+      if (ragChunkId.trim()) filterPayload.chunk_id = Number(ragChunkId);
       const res = await fetch("/ai-api/api/ai/kb/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: q, user_id: currentUserId })
+        body: JSON.stringify({ query: q, user_id: currentUserId, ...filterPayload })
       });
       const json = await res.json();
       if (json.code === 200) {
@@ -615,6 +622,51 @@ export default function KnowledgeBasePage() {
             </button>
           </div>
 
+          {/* 按文档、切片、页码缩小检索范围 */}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_110px_120px_auto]">
+            <select
+              value={ragDocId}
+              onChange={(e) => setRagDocId(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-hidden focus:ring-2 focus:ring-purple-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+              aria-label="按文档筛选"
+            >
+              <option value="">全部文档</option>
+              {documents.map((doc) => (
+                <option key={doc.id} value={String(doc.id)}>
+                  {doc.title}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={1}
+              placeholder="页码，如 12"
+              value={ragPage}
+              onChange={(e) => setRagPage(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-hidden focus:ring-2 focus:ring-purple-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+              aria-label="按页码筛选"
+            />
+            <input
+              type="number"
+              min={1}
+              placeholder="切片 ID"
+              value={ragChunkId}
+              onChange={(e) => setRagChunkId(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-hidden focus:ring-2 focus:ring-purple-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+              aria-label="按切片 ID 筛选"
+            />
+            <button
+              type="button"
+              onClick={() => { setRagDocId(""); setRagPage(""); setRagChunkId(""); }}
+              className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-500 hover:border-purple-300 hover:text-purple-600 dark:border-zinc-700 dark:text-zinc-400"
+            >
+              清除筛选
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-400">
+            可先输入检索词，再按文档、页码或切片 ID 缩小范围；结果会显示原文页码和切块编号。
+          </p>
+
           {ragResult && (
             <div className="p-5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/80 space-y-4 text-xs">
               <div className="flex items-center justify-between text-[11px] border-b border-slate-200/60 pb-2">
@@ -641,13 +693,23 @@ export default function KnowledgeBasePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {ragResult.sources?.map((s: any, idx: number) => (
                     <div key={idx} className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 space-y-1">
-                      <div className="flex items-center justify-between text-[11px] text-purple-600 font-bold">
-                        <span className="truncate max-w-[200px]">《{s.doc_title}》</span>
-                        <span className="font-mono bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded text-[10px]">第 {s.page_number} 页</span>
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-purple-600 font-bold">
+                        <span className="truncate max-w-[210px]">《{s.doc_title}》</span>
+                        <span className="shrink-0 font-mono bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded text-[10px]">
+                          第 {s.page_number} 页{s.chunk_index != null ? ` · 切块 #${s.chunk_index}` : ""}
+                        </span>
                       </div>
                       <p className="text-[11px] text-slate-600 dark:text-zinc-400 line-clamp-3">
                         {s.snippet}
                       </p>
+                      {s.doc_id != null && (
+                        <Link
+                          href={`/user/knowledge?doc=${encodeURIComponent(String(s.doc_id))}${s.chunk_id != null ? `&chunk=${encodeURIComponent(String(s.chunk_id))}` : ""}`}
+                          className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                          查看原文定位 <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      )}
                     </div>
                   ))}
                 </div>
