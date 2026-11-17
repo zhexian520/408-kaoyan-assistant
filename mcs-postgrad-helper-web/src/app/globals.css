@@ -1,0 +1,798 @@
+@import "tailwindcss";
+
+/* 手动白天/夜间模式：切换 <html class="dark"> 即可生效 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==========================================================================
+   管理后台统一设计系统 —— 深海军蓝 + 暖白
+   ========================================================================== */
+.admin-shell {
+  --a-bg: #f6f3ec;
+  --a-surface: #fffdf9;
+  --a-surface-solid: #fffdf9;
+  --a-border: #e6e0d4;
+  --a-border-strong: #d6cec0;
+  --a-text: #1f2933;
+  --a-muted: #5f6b76;
+  --a-faint: #98a2ad;
+  --a-accent: #1f3a56;
+  --a-accent-soft: #2c5275;
+  --a-warm: #b7791f;
+  --a-warm-soft: #d9a55a;
+  --a-shadow: 0 1px 2px rgba(31, 41, 51, 0.04), 0 10px 30px -24px rgba(31, 41, 51, 0.22);
+  --a-sidebar-bg: #fffdf9;
+  --a-sidebar-text: #1f2933;
+  --a-sidebar-muted: #778391;
+  --a-sidebar-border: #e6e0d4;
+  --a-sidebar-hover: #f5f1e9;
+  --a-sidebar-active: #edf2f7;
+  --a-sidebar-active-text: #1f3a56;
+  --a-sidebar-accent: #b7791f;
+  color-scheme: light;
+}
+
+.dark .admin-shell {
+  --a-bg: #0c1722;
+  --a-surface: #101f2e;
+  --a-surface-solid: #101f2e;
+  --a-border: #22374a;
+  --a-border-strong: #2d465c;
+  --a-text: #e7edf3;
+  --a-muted: #9fb0bf;
+  --a-faint: #6f8294;
+  --a-accent: #9cc3e0;
+  --a-accent-soft: #7ba8c9;
+  --a-warm: #d9a55a;
+  --a-warm-soft: #e8c48a;
+  --a-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -24px rgba(0, 0, 0, 0.7);
+  --a-sidebar-bg: #0b1b2b;
+  --a-sidebar-text: #e7edf3;
+  --a-sidebar-muted: #8fa2b2;
+  --a-sidebar-border: #1d3244;
+  --a-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --a-sidebar-active: rgba(255, 255, 255, 0.08);
+  --a-sidebar-active-text: #fffdf9;
+  --a-sidebar-accent: #d9a55a;
+  color-scheme: dark;
+}
+
+.admin-canvas {
+  background: var(--a-bg);
+}
+
+.admin-sidebar {
+  background: var(--a-sidebar-bg);
+  color: var(--a-sidebar-text);
+  border-color: var(--a-sidebar-border);
+}
+
+.admin-panel {
+  position: relative;
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  box-shadow: var(--a-shadow);
+}
+
+.admin-page-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0 0 1.25rem;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--a-border);
+  box-shadow: none;
+}
+
+@media (min-width: 1280px) {
+  .admin-page-head {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 0 1.35rem;
+  }
+}
+
+.admin-kpi {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  box-shadow: var(--a-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-kpi:hover {
+  transform: translateY(-2px);
+  border-color: var(--a-border-strong);
+  box-shadow: 0 1px 2px rgba(31, 41, 51, 0.05), 0 16px 34px -26px rgba(31, 41, 51, 0.28);
+}
+
+.admin-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--a-border-strong);
+  background: var(--a-surface-solid);
+  color: var(--a-text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  padding: 0.625rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-input::placeholder,
+.admin-textarea::placeholder {
+  color: var(--a-faint);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+  border-color: var(--a-accent-soft);
+  box-shadow: 0 0 0 3px rgba(31, 58, 86, 0.1);
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.admin-btn:active {
+  transform: scale(0.98);
+}
+
+.admin-btn-primary {
+  color: #fffdf9;
+  background: #1f3a56;
+  border: 1px solid #1f3a56;
+}
+
+.admin-btn-primary:hover {
+  background: #17304a;
+  border-color: #17304a;
+}
+
+.admin-btn-ghost {
+  color: var(--a-text);
+  background: var(--a-surface-solid);
+  border: 1px solid var(--a-border-strong);
+}
+
+.admin-btn-ghost:hover {
+  border-color: var(--a-accent-soft);
+  background: #f3efe7;
+}
+
+.admin-btn-dark {
+  color: #d7e2ea;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.admin-btn-dark:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.admin-btn-danger {
+  color: #a33b34;
+  background: #fbf0ee;
+  border: 1px solid #ecd3cf;
+}
+
+.admin-btn-danger:hover {
+  background: #f7e4e1;
+}
+
+.admin-btn-sm {
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.6rem;
+  font-size: 0.7rem;
+}
+
+.admin-input-sm,
+.admin-select-sm {
+  padding: 0.42rem 0.65rem;
+  border-radius: 0.55rem;
+  font-size: 0.7rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 0.8125rem;
+}
+
+.admin-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.8rem 1rem;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--a-faint);
+  background: #f3efe7;
+  border-bottom: 1px solid var(--a-border);
+  white-space: nowrap;
+}
+
+.admin-table tbody td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--a-border);
+  color: var(--a-muted);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(31, 58, 86, 0.035);
+}
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.admin-modal {
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 1.25rem;
+  background: var(--a-surface-solid);
+  border: 1px solid var(--a-border-strong);
+  box-shadow: 0 30px 70px -35px rgba(15, 23, 42, 0.55);
+}
+
+.admin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(31, 58, 86, 0.3) transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(31, 58, 86, 0.3);
+}
+
+.admin-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: #0b1b2b;
+  border: 1px solid #22374a;
+  box-shadow: none;
+}
+
+.admin-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #c3d0da;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.admin-hero-chip strong {
+  color: #fffdf9;
+}
+
+.admin-health-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 9999px;
+}
+
+.admin-health-ring-inner {
+  position: absolute;
+  inset: 9px;
+  border-radius: inherit;
+  background: #0b1b2b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-donut {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 10.5rem;
+  height: 10.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.admin-donut::after {
+  content: "";
+  position: absolute;
+  inset: 17px;
+  border-radius: inherit;
+  background: var(--a-surface-solid);
+  border: 1px solid var(--a-border);
+}
+
+.admin-donut-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-rank-bar {
+  height: 5px;
+  border-radius: 9999px;
+  background: rgba(31, 41, 51, 0.1);
+  overflow: hidden;
+}
+
+.admin-rank-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #1f3a56;
+}
+
+.admin-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(31, 41, 51, 0.1);
+  overflow: hidden;
+}
+
+.admin-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.62rem 0.7rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--a-sidebar-muted);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.admin-sidebar-link:hover {
+  color: var(--a-sidebar-text);
+  background: var(--a-sidebar-hover);
+}
+
+.admin-sidebar-link.is-active {
+  color: var(--a-sidebar-active-text);
+  background: var(--a-sidebar-active);
+  font-weight: 800;
+}
+
+.admin-sidebar-link.is-active::before {
+  content: "";
+  position: absolute;
+  left: -0.7rem;
+  top: 50%;
+  width: 3px;
+  height: 1.35rem;
+  transform: translateY(-50%);
+  border-radius: 9999px;
+  background: var(--a-sidebar-accent);
+}
+
+.admin-topbar {
+  background: var(--a-surface-solid);
+  border-bottom: 1px solid var(--a-border);
+}
+
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 13rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--a-border);
+  background: var(--a-bg);
+  color: var(--a-faint);
+  font-size: 0.72rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-search:focus-within {
+  border-color: var(--a-accent-soft);
+  box-shadow: 0 0 0 3px rgba(31, 58, 86, 0.08);
+}
+
+.admin-search input {
+  width: 100%;
+  background: transparent;
+  outline: none;
+  color: var(--a-text);
+  font-size: 0.72rem;
+}
+
+.admin-kbd {
+  border-radius: 0.3rem;
+  border: 1px solid var(--a-border-strong);
+  padding: 0.05rem 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  color: var(--a-faint);
+  background: var(--a-surface-solid);
+}
+
+.admin-fade-up {
+  animation: admin-fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes admin-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(47, 125, 93, 0.4); }
+  70% { box-shadow: 0 0 0 7px rgba(47, 125, 93, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 125, 93, 0); }
+}
+
+.admin-live-dot {
+  animation: admin-pulse-ring 2.4s infinite;
+}
+
+/* 彻底消除 KaTeX 报错时刺眼的 #cc0000 红色大色块与字体突变 */
+.katex-error {
+  color: inherit !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  border: none !important;
+}
+
+/* 408 专业课全科代码语法高亮主题 (VS Code / One Dark Pro) */
+.highlighted-code {
+  color: #c0caf5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+.highlighted-code .token.comment,
+.highlighted-code .token.prolog,
+.highlighted-code .token.doctype,
+.highlighted-code .token.cdata {
+  color: #636f88;
+  font-style: italic;
+}
+
+.highlighted-code .token.punctuation {
+  color: #89ddff;
+}
+
+.highlighted-code .token.keyword {
+  color: #bb9af7;
+  font-weight: 700;
+}
+
+.highlighted-code .token.property,
+.highlighted-code .token.tag,
+.highlighted-code .token.boolean,
+.highlighted-code .token.number,
+.highlighted-code .token.constant,
+.highlighted-code .token.symbol {
+  color: #ff9e64;
+}
+
+.highlighted-code .token.selector,
+.highlighted-code .token.attr-name,
+.highlighted-code .token.string,
+.highlighted-code .token.char,
+.highlighted-code .token.builtin {
+  color: #9ece6a;
+}
+
+.highlighted-code .token.operator,
+.highlighted-code .token.entity,
+.highlighted-code .token.url {
+  color: #7dcfff;
+}
+
+.highlighted-code .token.function,
+.highlighted-code .token.class-name {
+  color: #7aa2f7;
+  font-weight: 600;
+}
+
+.highlighted-code .token.variable,
+.highlighted-code .token.regex,
+.highlighted-code .token.important {
+  color: #f7768e;
+}
+
+/* 408 备考学情与答卷诊断报告 - 专属打印与 PDF 导出排版 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 12mm 15mm 12mm;
+  }
+  
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 只打印答卷报告，隐藏网页其余部分 */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-report,
+  .print-report * {
+    visibility: visible !important;
+  }
+
+  .print-report {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* 隐藏所有网页侧边栏、顶部导航和打印无关按钮 */
+  header,
+  nav,
+  aside,
+  .print\:hidden,
+  button:not(.print\:show) {
+    display: none !important;
+  }
+
+  /* 展开滚动容器保证内容打印完整 */
+  .overflow-y-auto,
+  .max-h-\[92vh\],
+  .max-h-\[460px\],
+  .max-h-72 {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* 打印时去除模糊阴影 */
+  .shadow-xs,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  .border {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* 打印分页防截断保护 */
+  .break-inside-avoid,
+  .rounded-3xl,
+  .rounded-2xl {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+/* Markdown 公式在窄栏中允许横向滚动，避免被裁切 */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}
+
+/* 课程中心阅读区：放大正文、表格、公式和代码，提升长文可读性 */
+.course-reading-prose p,
+.course-reading-prose li {
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+.course-reading-prose h1 {
+  font-size: 1.45rem;
+  line-height: 1.4;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.course-reading-prose h2 {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin-top: 1.5rem;
+  margin-bottom: 0.7rem;
+}
+
+.course-reading-prose h3 {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin-top: 1.2rem;
+  margin-bottom: 0.55rem;
+}
+
+.course-reading-prose h4 {
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.course-reading-prose table {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.course-reading-prose th,
+.course-reading-prose td {
+  padding: 0.55rem 0.7rem;
+}
+
+.course-reading-prose code {
+  font-size: 13px;
+}
+
+.course-reading-prose blockquote {
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+@media (min-width: 640px) {
+  .course-reading-prose p,
+  .course-reading-prose li {
+    font-size: 15px;
+  }
+}
+
+
+/* 全站响应式兜底：防止横向溢出，媒体元素自适应 */
+html,
+body {
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  .course-reading-prose p,
+  .course-reading-prose li {
+    font-size: 14px;
+    line-height: 1.9;
+  }
+}
+
+/* ==========================================================================
+   移动端响应式兜底：动态视口、触控与表单防缩放
+   ========================================================================== */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 640px) {
+  /* iOS Safari 聚焦小于 16px 的输入框会自动放大页面 */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  /* 移动端表格保持横向滚动，不挤压列内容 */
+  .admin-table th,
+  .admin-table td {
+    white-space: nowrap;
+  }
+}
