@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.CourseKnowledgeMapper">
+
+    <select id="selectCourseChapters" resultType="java.util.LinkedHashMap">
+        SELECT id, subject_code AS subjectCode, title, chapter_number AS chapterNumber, sort_order AS sortOrder
+        FROM k_chapter
+        WHERE subject_code = #{subjectCode} AND id LIKE 'course_%'
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectCourseSections" resultType="java.util.LinkedHashMap">
+        SELECT id, chapter_id AS chapterId, title, summary, sort_order AS sortOrder
+        FROM k_section
+        WHERE chapter_id = #{chapterId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectAllGraphRows" resultType="java.util.LinkedHashMap">
+        SELECT c.subject_code AS subjectCode,
+               c.title AS chapterTitle,
+               c.chapter_number AS chapterOrder,
+               c.id AS chapterId,
+               p.id AS pointId,
+               p.title AS pointTitle,
+               p.importance AS importance,
+               p.exam_frequency AS examFrequency,
+               p.tags_json AS tagsJson
+        FROM k_chapter c
+        JOIN k_section s ON s.chapter_id = c.id
+        JOIN k_point p ON p.section_id = s.id
+        ORDER BY c.subject_code, c.chapter_number, s.sort_order, p.sort_order
+    </select>
+
+    <select id="selectPointDetail" resultType="java.util.LinkedHashMap">
+        SELECT p.id, p.title, p.summary, p.importance, p.exam_frequency AS examFrequency,
+               p.tags_json AS tagsJson, c.subject_code AS subjectCode, c.title AS chapterTitle,
+               a.content_md AS contentMd, a.meta_json AS metaJson
+        FROM k_point p
+        JOIN k_section s ON s.id = p.section_id
+        JOIN k_chapter c ON c.id = s.chapter_id
+        LEFT JOIN k_article a ON a.point_id = p.id
+        WHERE p.id = #{pointId}
+        LIMIT 1
+    </select>
+
+    <select id="selectCoursePoints" resultType="java.util.LinkedHashMap">
+        SELECT p.id, p.section_id AS sectionId, p.title, p.summary, p.importance,
+               p.exam_frequency AS examFrequency, p.tags_json AS tagsJson,
+               a.content_md AS contentMd, a.meta_json AS metaJson
+        FROM k_point p
+        LEFT JOIN k_article a ON a.point_id = p.id
+        WHERE p.section_id = #{sectionId}
+        ORDER BY p.sort_order ASC
+        LIMIT 1
+    </select>
+
+</mapper>

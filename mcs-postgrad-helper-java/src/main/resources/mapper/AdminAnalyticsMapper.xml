@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.AdminAnalyticsMapper">
+
+    <select id="selectPlatformTotals" resultType="java.util.LinkedHashMap">
+        SELECT
+            ((SELECT COUNT(*) FROM test_answer_detail) +
+             (SELECT COUNT(*) FROM user_question_attempt)) AS answeredTotal,
+            ((SELECT IFNULL(SUM(is_correct), 0) FROM test_answer_detail) +
+             (SELECT IFNULL(SUM(is_correct), 0) FROM user_question_attempt)) AS correctTotal,
+            (SELECT COUNT(*) FROM test_record) AS mockCount,
+            (SELECT COUNT(*) FROM user_wrong_question) AS wrongTotal,
+            (SELECT COUNT(*) FROM user_wrong_question WHERE master_status = 'MASTERED') AS wrongMastered,
+            (SELECT COUNT(*) FROM sys_user) AS userCount,
+            (SELECT COUNT(*) FROM exam_question) AS questionCount
+    </select>
+
+    <select id="selectSubjectAccuracy" resultType="java.util.LinkedHashMap">
+        SELECT subjectCode, SUM(answered) AS answered, SUM(correct) AS correct
+        FROM (
+            SELECT UPPER(eq.subject_code) AS subjectCode, 1 AS answered, IFNULL(tad.is_correct, 0) AS correct
+            FROM test_answer_detail tad
+            LEFT JOIN exam_question eq ON eq.id = tad.question_id
+            WHERE eq.subject_code IS NOT NULL
+            UNION ALL
+            SELECT UPPER(subject_code) AS subjectCode, 1 AS answered, IFNULL(is_correct, 0) AS correct
+            FROM user_question_attempt
+            WHERE subject_code IS NOT NULL
+        ) t
+        GROUP BY subjectCode
+    </select>
+
+    <select id="selectTopWeakChapters" resultType="java.util.LinkedHashMap">
+        SELECT chapterName, subjectCode, SUM(wrongCount) AS wrongCount
+        FROM (
+            SELECT eq.chapter_name AS chapterName, UPPER(eq.subject_code) AS subjectCode, 1 AS wrongCount
+            FROM test_answer_detail tad
+            JOIN exam_question eq ON eq.id = tad.question_id
+            WHERE tad.is_correct = 0 AND eq.chapter_name IS NOT NULL AND eq.chapter_name &lt;&gt; ''
+            UNION ALL
+            SELECT eq.chapter_name AS chapterName, UPPER(eq.subject_code) AS subjectCode, 1 AS wrongCount
+            FROM user_question_attempt uqa
+            JOIN exam_question eq ON eq.id = uqa.question_id
+            WHERE uqa.is_correct = 0 AND eq.chapter_name IS NOT NULL AND eq.chapter_name &lt;&gt; ''
+        ) t
+        GROUP BY chapterName, subjectCode
+        ORDER BY wrongCount DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectTopWrongQuestions" resultType="java.util.LinkedHashMap">
+        SELECT questionId, stem, subjectCode, chapterName, SUM(wrongCount) AS wrongCount
+        FROM (
+            SELECT eq.id AS questionId, eq.stem AS stem, UPPER(eq.subject_code) AS subjectCode,
+                   eq.chapter_name AS chapterName, 1 AS wrongCount
+            FROM test_answer_detail tad
+            JOIN exam_question eq ON eq.id = tad.question_id
+            WHERE tad.is_correct = 0
+            UNION ALL
+            SELECT eq.id AS questionId, eq.stem AS stem, UPPER(eq.subject_code) AS subjectCode,
+                   eq.chapter_name AS chapterName, 1 AS wrongCount
+            FROM user_question_attempt uqa
+            JOIN exam_question eq ON eq.id = uqa.question_id
+            WHERE uqa.is_correct = 0
+        ) t
+        GROUP BY questionId, stem, subjectCode, chapterName
+        ORDER BY wrongCount DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectDailyActivity" resultType="java.util.LinkedHashMap">
+        SELECT day, SUM(answered) AS answered, SUM(correct) AS correct
+        FROM (
+            SELECT DATE(tr.created_at) AS day, 1 AS answered, IFNULL(tad.is_correct, 0) AS correct
+            FROM test_answer_detail tad
+            JOIN test_record tr ON tr.id = tad.test_record_id
+            WHERE tr.created_at &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            UNION ALL
+            SELECT DATE(created_at) AS day, 1 AS answered, IFNULL(is_correct, 0) AS correct
+            FROM user_question_attempt
+            WHERE created_at &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        ) t
+        GROUP BY day
+        ORDER BY day ASC
+    </select>
+
+</mapper>

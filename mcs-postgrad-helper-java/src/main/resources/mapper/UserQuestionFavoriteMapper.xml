@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.UserQuestionFavoriteMapper">
+
+    <insert id="insert" parameterType="com.example.mcs.entity.UserQuestionFavorite">
+        INSERT INTO user_question_favorite (user_id, question_id, tag, note)
+        VALUES (#{userId}, #{questionId}, #{tag}, #{note})
+        ON DUPLICATE KEY UPDATE tag = VALUES(tag), note = VALUES(note)
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM user_question_favorite
+        WHERE user_id = #{userId} AND question_id = #{questionId}
+    </delete>
+
+    <select id="checkFavorited" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM user_question_favorite
+        WHERE user_id = #{userId} AND question_id = #{questionId}
+    </select>
+
+    <select id="selectUserFavoriteQuestionIds" resultType="java.lang.String">
+        SELECT question_id
+        FROM user_question_favorite
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>
+

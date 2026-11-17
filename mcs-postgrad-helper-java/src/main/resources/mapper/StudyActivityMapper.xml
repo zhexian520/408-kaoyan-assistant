@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.StudyActivityMapper">
+
+    <select id="selectUserTotals" resultType="java.util.LinkedHashMap">
+        SELECT
+            ((SELECT COUNT(*)
+              FROM test_answer_detail tad
+              JOIN test_record tr ON tr.id = tad.test_record_id
+              WHERE tr.user_id = #{userId})
+             +
+             (SELECT COUNT(*) FROM user_question_attempt WHERE user_id = #{userId})) AS answeredTotal,
+            ((SELECT IFNULL(SUM(tad.is_correct), 0)
+              FROM test_answer_detail tad
+              JOIN test_record tr ON tr.id = tad.test_record_id
+              WHERE tr.user_id = #{userId})
+             +
+             (SELECT IFNULL(SUM(is_correct), 0) FROM user_question_attempt WHERE user_id = #{userId})) AS correctTotal,
+            (SELECT COUNT(*) FROM test_record WHERE user_id = #{userId}) AS mockCount,
+            (SELECT COUNT(*) FROM user_note WHERE user_id = #{userId}) AS noteCount,
+            (SELECT COUNT(*) FROM user_wrong_question WHERE user_id = #{userId}) AS wrongTotal,
+            (SELECT COUNT(*) FROM user_wrong_question
+             WHERE user_id = #{userId} AND (master_status IS NULL OR master_status &lt;&gt; 'MASTERED')) AS wrongOpen,
+            (SELECT COUNT(*) FROM user_wrong_question
+             WHERE user_id = #{userId} AND master_status = 'MASTERED') AS wrongMastered
+    </select>
+
+    <select id="selectSubjectAnswerCounts" resultType="java.util.LinkedHashMap">
+        SELECT subjectCode, SUM(answered) AS answered, SUM(correct) AS correct
+        FROM (
+            SELECT UPPER(eq.subject_code) AS subjectCode,
+                   1 AS answered,
+                   IFNULL(tad.is_correct, 0) AS correct
+            FROM test_answer_detail tad
+            JOIN test_record tr ON tr.id = tad.test_record_id
+            LEFT JOIN exam_question eq ON eq.id = tad.question_id
+            WHERE tr.user_id = #{userId} AND eq.subject_code IS NOT NULL
+            UNION ALL
+            SELECT UPPER(subject_code) AS subjectCode,
+                   1 AS answered,
+                   IFNULL(is_correct, 0) AS correct
+            FROM user_question_attempt
+            WHERE user_id = #{userId} AND subject_code IS NOT NULL
+        ) attempts
+        GROUP BY subjectCode
+    </select>
+
+    <select id="selectWrongMasteredBySubject" resultType="java.util.LinkedHashMap">
+        SELECT UPPER(subject_code) AS subjectCode, COUNT(*) AS mastered
+        FROM user_wrong_question
+        WHERE user_id = #{userId} AND master_status = 'MASTERED'
+        GROUP BY UPPER(subject_code)
+    </select>
+
+    <select id="selectQuestionTotalsBySubject" resultType="java.util.LinkedHashMap">
+        SELECT UPPER(subject_code) AS subjectCode, COUNT(*) AS total
+        FROM exam_question
+        GROUP BY UPPER(subject_code)
+    </select>
+
+    <select id="selectMasteryBySubject" resultType="java.util.LinkedHashMap">
+        SELECT UPPER(subject_code) AS subjectCode,
+               IFNULL(AVG(accuracy_rate), 0) AS avgAccuracy,
+               COUNT(*) AS pointCount
+        FROM user_knowledge_mastery
+        WHERE user_id = #{userId}
+        GROUP BY UPPER(subject_code)
+    </select>
+
+    <select id="selectRecentDailyActivity" resultType="java.util.LinkedHashMap">
+        SELECT day, SUM(answered) AS answered, SUM(correct) AS correct
+        FROM (
+            SELECT DATE(tr.created_at) AS day,
+                   1 AS answered,
+                   IFNULL(tad.is_correct, 0) AS correct
+            FROM test_answer_detail tad
+            JOIN test_record tr ON tr.id = tad.test_record_id
+            WHERE tr.user_id = #{userId}
+              AND tr.created_at &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+            UNION ALL
+            SELECT DATE(created_at) AS day,
+                   1 AS answered,
+                   IFNULL(is_correct, 0) AS correct
+            FROM user_question_attempt
+            WHERE user_id = #{userId}
+              AND created_at &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        ) daily
+        GROUP BY day
+        ORDER BY day ASC
+    </select>
+
+    <select id="selectLastMock" resultType="java.util.LinkedHashMap">
+        SELECT test_title AS testTitle,
+               user_score AS userScore,
+               total_score AS totalScore,
+               created_at AS createdAt
+        FROM test_record
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectDailyPushDays" resultType="long">
+        SELECT COUNT(DISTINCT DATE(created_at))
+        FROM user_question_attempt
+        WHERE user_id = #{userId}
+          AND source_type = 'DAILY_PUSH'
+    </select>
+
+</mapper>

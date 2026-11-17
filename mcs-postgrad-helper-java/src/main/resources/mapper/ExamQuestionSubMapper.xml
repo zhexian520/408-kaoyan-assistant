@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.ExamQuestionSubMapper">
+
+    <select id="selectByQuestionId" resultType="com.example.mcs.entity.ExamQuestionSub">
+        SELECT id, question_id, sub_number, sub_stem, score, standard_answer, rubric_points_json
+        FROM exam_question_sub
+        WHERE question_id = #{questionId}
+        ORDER BY sub_number ASC
+    </select>
+
+    <select id="selectByQuestionIds" resultType="com.example.mcs.entity.ExamQuestionSub">
+        SELECT id, question_id, sub_number, sub_stem, score, standard_answer, rubric_points_json
+        FROM exam_question_sub
+        WHERE question_id IN
+        <foreach item="item" collection="questionIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY question_id ASC, sub_number ASC
+    </select>
+
+</mapper>
+

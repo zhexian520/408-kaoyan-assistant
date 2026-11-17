@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.KbMapper">
+
+    <select id="selectDocuments" resultType="com.example.mcs.entity.KbDocument">
+        SELECT id, user_id, title, file_type, file_url, file_size, subject_code, parse_status, error_msg, chunk_count, is_public, created_at
+        FROM kb_document
+        WHERE 1=1
+        <if test="isPublic != null">
+            AND is_public = #{isPublic}
+        </if>
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="subjectCode != null and subjectCode != ''">
+            AND subject_code = #{subjectCode}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectDocumentById" resultType="com.example.mcs.entity.KbDocument">
+        SELECT id, user_id, title, file_type, file_url, file_size, subject_code, parse_status, error_msg, chunk_count, is_public, created_at
+        FROM kb_document
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertDocument" parameterType="com.example.mcs.entity.KbDocument" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_document (user_id, title, file_type, file_url, file_size, subject_code, parse_status, error_msg, chunk_count, is_public)
+        VALUES (#{userId}, #{title}, #{fileType}, #{fileUrl}, #{fileSize}, #{subjectCode}, #{parseStatus}, #{errorMsg}, #{chunkCount}, #{isPublic})
+    </insert>
+
+    <delete id="deleteDocumentById">
+        DELETE FROM kb_document WHERE id = #{id}
+    </delete>
+
+    <select id="selectChunksByDocId" resultType="com.example.mcs.entity.KbChunk">
+        SELECT id, document_id, chunk_index, content, token_count, page_number, bbox_json, image_url, vector_id, created_at
+        FROM kb_chunk
+        WHERE document_id = #{documentId}
+        ORDER BY chunk_index ASC
+    </select>
+
+    <insert id="insertChunk" parameterType="com.example.mcs.entity.KbChunk" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_chunk (document_id, chunk_index, content, token_count, page_number, bbox_json, image_url, vector_id)
+        VALUES (#{documentId}, #{chunkIndex}, #{content}, #{tokenCount}, #{pageNumber}, #{bboxJson}, #{imageUrl}, #{vectorId})
+    </insert>
+
+    <select id="selectAllSubjects" resultType="com.example.mcs.entity.KSubject">
+        SELECT code, name, icon, sort_order, description
+        FROM k_subject
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectChaptersBySubject" resultType="com.example.mcs.entity.KChapter">
+        SELECT id, subject_code, title, chapter_number, layer, sort_order
+        FROM k_chapter
+        WHERE subject_code = #{subjectCode}
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectPointsBySubject" resultType="com.example.mcs.entity.KPoint">
+        SELECT p.id, p.section_id, p.title, p.summary, p.importance, p.exam_frequency, p.tags_json, p.sort_order
+        FROM k_point p
+        JOIN k_section s ON p.section_id = s.id
+        JOIN k_chapter c ON s.chapter_id = c.id
+        WHERE c.subject_code = #{subjectCode}
+        ORDER BY p.exam_frequency DESC
+    </select>
+
+</mapper>
+

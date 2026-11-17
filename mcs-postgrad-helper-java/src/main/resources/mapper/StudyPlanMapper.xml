@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.StudyPlanMapper">
+
+    <select id="selectActivePlanByUserId" resultType="com.example.mcs.entity.UserStudyPlan">
+        SELECT id, user_id, plan_name, prep_duration_months, base_level, target_score, current_stage, start_date, exam_date, daily_target_hours, is_active, created_at, updated_at
+        FROM user_study_plan
+        WHERE user_id = #{userId} AND is_active = 1
+        ORDER BY updated_at DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insertPlan" parameterType="com.example.mcs.entity.UserStudyPlan" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_study_plan (user_id, plan_name, prep_duration_months, base_level, target_score, current_stage, start_date, exam_date, daily_target_hours, is_active)
+        VALUES (#{userId}, #{planName}, #{prepDurationMonths}, #{baseLevel}, #{targetScore}, #{currentStage}, #{startDate}, #{examDate}, #{dailyTargetHours}, #{isActive})
+    </insert>
+
+    <update id="updatePlan" parameterType="com.example.mcs.entity.UserStudyPlan">
+        UPDATE user_study_plan
+        <set>
+            <if test="planName != null">plan_name = #{planName},</if>
+            <if test="prepDurationMonths != null">prep_duration_months = #{prepDurationMonths},</if>
+            <if test="baseLevel != null">base_level = #{baseLevel},</if>
+            <if test="targetScore != null">target_score = #{targetScore},</if>
+            <if test="currentStage != null">current_stage = #{currentStage},</if>
+            <if test="dailyTargetHours != null">daily_target_hours = #{dailyTargetHours},</if>
+            <if test="isActive != null">is_active = #{isActive},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectTasksByPlanId" resultType="com.example.mcs.entity.UserStudyPlanTask">
+        SELECT id, plan_id, week_number, stage, subject_code, title, task_type, target_chapter_id,
+               is_completed, completed_at, description, target_route, target_count, progress_current,
+               progress_unit, auto_rule, baseline_value, due_date, priority, is_auto, last_synced_at
+        FROM user_study_plan_task
+        WHERE plan_id = #{planId}
+        ORDER BY week_number ASC, id ASC
+    </select>
+
+    <insert id="insertTask" parameterType="com.example.mcs.entity.UserStudyPlanTask" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_study_plan_task
+        (plan_id, week_number, stage, subject_code, title, task_type, target_chapter_id, is_completed, completed_at,
+         description, target_route, target_count, progress_current, progress_unit, auto_rule, baseline_value,
+         due_date, priority, is_auto, last_synced_at)
+        VALUES
+        (#{planId}, #{weekNumber}, #{stage}, #{subjectCode}, #{title}, #{taskType}, #{targetChapterId}, #{isCompleted}, #{completedAt},
+         #{description}, #{targetRoute}, #{targetCount}, #{progressCurrent}, #{progressUnit}, #{autoRule}, #{baselineValue},
+         #{dueDate}, #{priority}, #{isAuto}, #{lastSyncedAt})
+    </insert>
+
+    <update id="updateTaskCompletion">
+        UPDATE user_study_plan_task
+        SET is_completed = #{isCompleted},
+            completed_at = CASE WHEN #{isCompleted} = 1 THEN NOW() ELSE NULL END
+        WHERE id = #{taskId}
+    </update>
+
+    <update id="updateTaskProgress">
+        UPDATE user_study_plan_task
+        SET progress_current = #{progressCurrent},
+            is_completed = #{isCompleted},
+            completed_at = CASE
+                WHEN #{isCompleted} = 1 AND completed_at IS NULL THEN NOW()
+                WHEN #{isCompleted} = 0 THEN NULL
+                ELSE completed_at
+            END,
+            last_synced_at = #{lastSyncedAt}
+        WHERE id = #{taskId}
+    </update>
+
+    <update id="deactivatePlans">
+        UPDATE user_study_plan SET is_active = 0 WHERE user_id = #{userId} AND is_active = 1
+    </update>
+
+</mapper>
+

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.TestRecordMapper">
+
+    <insert id="insert" parameterType="com.example.mcs.entity.TestRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO test_record 
+        (user_id, paper_id, test_title, test_type, subject_code, total_score, user_score, time_spent_seconds, status, start_time, submit_time, ai_report_summary, weak_points_json)
+        VALUES 
+        (#{userId}, #{paperId}, #{testTitle}, #{testType}, #{subjectCode}, #{totalScore}, #{userScore}, #{timeSpentSeconds}, #{status}, #{startTime}, #{submitTime}, #{aiReportSummary}, #{weakPointsJson})
+    </insert>
+
+    <update id="update" parameterType="com.example.mcs.entity.TestRecord">
+        UPDATE test_record
+        <set>
+            <if test="userScore != null">user_score = #{userScore},</if>
+            <if test="timeSpentSeconds != null">time_spent_seconds = #{timeSpentSeconds},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="aiReportSummary != null">ai_report_summary = #{aiReportSummary},</if>
+            <if test="weakPointsJson != null">weak_points_json = #{weakPointsJson},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultType="com.example.mcs.entity.TestRecord">
+        SELECT id, user_id, paper_id, test_title, test_type, subject_code, total_score, user_score, time_spent_seconds, status, start_time, submit_time, ai_report_summary, weak_points_json, created_at
+        FROM test_record
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultType="com.example.mcs.entity.TestRecord">
+        SELECT id, user_id, paper_id, test_title, test_type, subject_code, total_score, user_score, time_spent_seconds, status, start_time, submit_time, ai_report_summary, weak_points_json, created_at
+        FROM test_record
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectRecentRecords" resultType="com.example.mcs.entity.TestRecord">
+        SELECT id, user_id, paper_id, test_title, test_type, subject_code, total_score, user_score, time_spent_seconds, status, start_time, submit_time, ai_report_summary, weak_points_json, created_at
+        FROM test_record
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countAllRecords" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM test_record
+    </select>
+
+    <select id="selectAvgScore" resultType="java.lang.Double">
+        SELECT IFNULL(AVG(user_score), 0) FROM test_record
+    </select>
+
+</mapper>

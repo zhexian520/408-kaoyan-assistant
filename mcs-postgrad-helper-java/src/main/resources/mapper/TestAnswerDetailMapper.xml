@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.TestAnswerDetailMapper">
+
+    <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO test_answer_detail 
+        (test_record_id, question_id, sub_question_id, user_answer, is_correct, score_earned, ai_feedback, missing_points_json, error_analysis, rubric_matched_json, optimization_advice, graded_by, graded_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.testRecordId}, #{item.questionId}, #{item.subQuestionId}, #{item.userAnswer}, #{item.isCorrect}, #{item.scoreEarned}, #{item.aiFeedback}, #{item.missingPointsJson}, #{item.errorAnalysis}, #{item.rubricMatchedJson}, #{item.optimizationAdvice}, #{item.gradedBy}, #{item.gradedAt})
+        </foreach>
+    </insert>
+
+    <select id="selectByRecordId" resultType="com.example.mcs.entity.TestAnswerDetail">
+        SELECT id, test_record_id, question_id, sub_question_id, user_answer, is_correct, score_earned, ai_feedback, missing_points_json, error_analysis, rubric_matched_json, optimization_advice, graded_by, graded_at
+        FROM test_answer_detail
+        WHERE test_record_id = #{testRecordId}
+        ORDER BY id ASC
+    </select>
+
+</mapper>
+

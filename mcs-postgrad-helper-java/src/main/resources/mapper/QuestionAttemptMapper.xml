@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.QuestionAttemptMapper">
+
+    <insert id="insert" parameterType="com.example.mcs.entity.QuestionAttempt" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_question_attempt (user_id, question_id, subject_code, is_correct, user_answer, source_type)
+        VALUES (#{userId}, #{questionId}, #{subjectCode}, #{isCorrect}, #{userAnswer}, #{sourceType})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO user_question_attempt (user_id, question_id, subject_code, is_correct, user_answer, source_type)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.questionId}, #{item.subjectCode}, #{item.isCorrect}, #{item.userAnswer}, #{item.sourceType})
+        </foreach>
+    </insert>
+
+</mapper>

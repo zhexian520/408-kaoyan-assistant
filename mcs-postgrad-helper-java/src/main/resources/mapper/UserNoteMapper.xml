@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.UserNoteMapper">
+
+    <select id="selectNotesByUserId" resultType="com.example.mcs.entity.UserNote">
+        SELECT id, user_id, title, subject_code, content_md, tags_json, related_knowledge_id, related_question_id, excerpt_source, is_ai_summarized, ai_summary, created_at, updated_at
+        FROM user_note
+        WHERE user_id = #{userId}
+        <if test="subjectCode != null and subjectCode != ''">
+            AND subject_code = #{subjectCode}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR content_md LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="selectNoteById" resultType="com.example.mcs.entity.UserNote">
+        SELECT id, user_id, title, subject_code, content_md, tags_json, related_knowledge_id, related_question_id, excerpt_source, is_ai_summarized, ai_summary, created_at, updated_at
+        FROM user_note
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertNote" parameterType="com.example.mcs.entity.UserNote" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_note (user_id, title, subject_code, content_md, tags_json, related_knowledge_id, related_question_id, excerpt_source, is_ai_summarized, ai_summary)
+        VALUES (#{userId}, #{title}, #{subjectCode}, #{contentMd}, #{tagsJson}, #{relatedKnowledgeId}, #{relatedQuestionId}, #{excerptSource}, #{isAiSummarized}, #{aiSummary})
+    </insert>
+
+    <update id="updateNote" parameterType="com.example.mcs.entity.UserNote">
+        UPDATE user_note
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="subjectCode != null">subject_code = #{subjectCode},</if>
+            <if test="contentMd != null">content_md = #{contentMd},</if>
+            <if test="tagsJson != null">tags_json = #{tagsJson},</if>
+            <if test="relatedKnowledgeId != null">related_knowledge_id = #{relatedKnowledgeId},</if>
+            <if test="relatedQuestionId != null">related_question_id = #{relatedQuestionId},</if>
+            <if test="excerptSource != null">excerpt_source = #{excerptSource},</if>
+            <if test="isAiSummarized != null">is_ai_summarized = #{isAiSummarized},</if>
+            <if test="aiSummary != null">ai_summary = #{aiSummary},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteNoteById">
+        DELETE FROM user_note WHERE id = #{id}
+    </delete>
+
+</mapper>
+

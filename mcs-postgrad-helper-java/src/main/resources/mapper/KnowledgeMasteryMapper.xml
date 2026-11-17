@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.KnowledgeMasteryMapper">
+
+    <select id="selectByUserId" resultType="com.example.mcs.entity.UserKnowledgeMastery">
+        SELECT id, user_id, knowledge_block_id, subject_code, total_attempts, correct_attempts, accuracy_rate, mastery_level, weakness_score, last_practiced_at, updated_at
+        FROM user_knowledge_mastery
+        WHERE user_id = #{userId}
+        <if test="subjectCode != null and subjectCode != ''">
+            AND subject_code = #{subjectCode}
+        </if>
+        ORDER BY weakness_score DESC
+    </select>
+
+    <insert id="insertOrUpdate" parameterType="com.example.mcs.entity.UserKnowledgeMastery">
+        INSERT INTO user_knowledge_mastery (user_id, knowledge_block_id, subject_code, total_attempts, correct_attempts, accuracy_rate, mastery_level, weakness_score, last_practiced_at)
+        VALUES (#{userId}, #{knowledgeBlockId}, #{subjectCode}, #{totalAttempts}, #{correctAttempts}, #{accuracyRate}, #{masteryLevel}, #{weaknessScore}, #{lastPracticedAt})
+        ON DUPLICATE KEY UPDATE 
+            total_attempts = VALUES(total_attempts),
+            correct_attempts = VALUES(correct_attempts),
+            accuracy_rate = VALUES(accuracy_rate),
+            mastery_level = VALUES(mastery_level),
+            weakness_score = VALUES(weakness_score),
+            last_practiced_at = VALUES(last_practiced_at)
+    </insert>
+
+</mapper>
+

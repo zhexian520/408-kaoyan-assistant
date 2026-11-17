@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mcs.mapper.UserWrongQuestionMapper">
+
+    <insert id="insertOrUpdate" parameterType="com.example.mcs.entity.UserWrongQuestion">
+        INSERT INTO user_wrong_question 
+        (user_id, question_id, custom_question_json, subject_code, knowledge_block_id, source_type, wrong_count, master_status, error_reason_tag, user_notes, last_wrong_answer, last_practiced_at)
+        VALUES 
+        (#{userId}, #{questionId}, #{customQuestionJson}, #{subjectCode}, #{knowledgeBlockId}, #{sourceType}, #{wrongCount}, #{masterStatus}, #{errorReasonTag}, #{userNotes}, #{lastWrongAnswer}, #{lastPracticedAt})
+        ON DUPLICATE KEY UPDATE 
+            wrong_count = wrong_count + 1,
+            last_wrong_answer = VALUES(last_wrong_answer),
+            last_practiced_at = VALUES(last_practiced_at),
+            master_status = 'UNMASTERED'
+    </insert>
+
+    <select id="selectByUserId" resultType="com.example.mcs.entity.UserWrongQuestion">
+        SELECT id, user_id, question_id, custom_question_json, subject_code, knowledge_block_id, source_type, wrong_count, master_status, error_reason_tag, user_notes, last_wrong_answer, last_practiced_at, created_at, updated_at
+        FROM user_wrong_question
+        WHERE user_id = #{userId}
+        <if test="subjectCode != null and subjectCode != ''">
+            AND subject_code = #{subjectCode}
+        </if>
+        <if test="masterStatus != null and masterStatus != ''">
+            AND master_status = #{masterStatus}
+        </if>
+        ORDER BY updated_at DESC
+    </select>
+
+    <select id="countByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM user_wrong_question
+        WHERE user_id = #{userId}
+        <if test="masterStatus != null and masterStatus != ''">
+            AND master_status = #{masterStatus}
+        </if>
+    </select>
+
+    <delete id="deleteByUserId">
+        DELETE FROM user_wrong_question
+        WHERE user_id = #{userId}
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM user_wrong_question
+        WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <update id="updateMasterStatus">
+        UPDATE user_wrong_question
+        SET master_status = #{masterStatus}, last_practiced_at = NOW()
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+</mapper>
