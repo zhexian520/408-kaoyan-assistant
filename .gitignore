@@ -1,0 +1,45 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# frontend
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# java
+target/
+*.class
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# logs
+*.log
+
+# local runtime data
+kaoyan/data/chat_history/
+kaoyan/data/agent_runs/
+kaoyan/data/daily_push_cache/
+kaoyan/data/users/
+kaoyan/data/agent_memory/
+kaoyan/data/school_selection_cache/
+kaoyan/data/school_selection_runs/
+kaoyan/.kaoyan.pid
+
+# local database / temp
+*.sql.gz
+_tmp_*
