@@ -628,6 +628,15 @@ export default function MultimodalQAPage() {
                 doc_id: citation.doc_id ?? null,
                 chunk_id: citation.chunk_id ?? null,
               }));
+              // 引用元数据通常在 done 事件里，立即挂到当前回答，不能等下一个正文 chunk
+              setMessages((prev) => {
+                const updated = [...prev];
+                const lastIdx = updated.length - 1;
+                if (lastIdx >= 0 && updated[lastIdx].role === "assistant") {
+                  updated[lastIdx] = { ...updated[lastIdx], citations: capturedCitations };
+                }
+                return updated;
+              });
             }
             if (parsed.type === "conversation" && parsed.conversation_id) {
               setActiveConversationId(parsed.conversation_id);
