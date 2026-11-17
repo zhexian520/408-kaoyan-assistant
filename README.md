@@ -9,7 +9,7 @@
 - 为什么错
 - 下一步练什么
 
-![项目海报](docs/poster.png)
+![项目海报](docs/poster-408-ai.png)
 
 ## 项目介绍
 
@@ -251,7 +251,7 @@ pytest -q
 
 - [项目介绍文档（DOCX）](docs/408-project-introduction.docx)
 - [项目介绍文档（PDF）](docs/408-project-introduction.pdf)
-- [项目海报](docs/poster.png)
+- [项目海报](docs/poster-408-ai.png)
 - [演示视频旁白](docs/video-narration.docx)
 
 ## 团队信息
